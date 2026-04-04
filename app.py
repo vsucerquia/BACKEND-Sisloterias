@@ -1,3 +1,5 @@
+"""Aplicación FastAPI: registro de routers por entidad."""
+
 from fastapi import FastAPI
 from endpoints import (
     jugadores_router,
@@ -23,4 +25,5 @@ app.include_router(pagos_router.router)
 
 @app.get("/")
 def root():
+    """Comprueba que la API está activa."""
     return {"message": "API Lotería funcionando"}

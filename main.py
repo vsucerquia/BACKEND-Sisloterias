@@ -1,9 +1,13 @@
-"""Entrypoint para ejecutar la API en modo desarrollo.
+"""Arranca el servidor ASGI (Uvicorn) con la aplicación FastAPI.
 
 Uso:
     python main.py
 
-El servidor se iniciará en http://0.0.0.0:8000
+El servidor queda en http://127.0.0.1:8000 (documentación en /docs).
+
+Para el menú por consola que consume la API vía HTTP, usa en otra terminal::
+
+    python menu_cli.py
 """
 
 import uvicorn
