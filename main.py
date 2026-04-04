@@ -1,0 +1,13 @@
+"""Entrypoint para ejecutar la API en modo desarrollo.
+
+Uso:
+    python main.py
+
+El servidor se iniciará en http://0.0.0.0:8000
+"""
+
+import uvicorn
+
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
