@@ -2,21 +2,34 @@
 
 from __future__ import annotations
 
+import os
+
 import requests
 
 
 class CrudClient:
-    """Envía GET/POST/PUT/DELETE a ``base_url`` para un recurso dado (path relativo)."""
+    """Envía GET/POST/PUT/DELETE a ``base_url``; opcional Bearer desde ``API_BEARER_TOKEN``."""
 
-    def __init__(self, base_url: str = "http://127.0.0.1:8000") -> None:
-        self.base_url = base_url.rstrip("/")
+    def __init__(self, base_url: str | None = None) -> None:
+        env_url = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
+        self.base_url = (base_url or env_url).rstrip("/")
+
+    def _headers(self) -> dict:
+        token = os.getenv("API_BEARER_TOKEN", "").strip()
+        if token:
+            return {"Authorization": f"Bearer {token}"}
+        return {}
 
     def _request(self, method, endpoint: str, data: dict | None = None):
         """Ejecuta una petición y devuelve JSON o un dict con error estructurado."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        headers = self._headers()
         response = None
         try:
-            response = method(url, json=data) if data else method(url)
+            if data is not None:
+                response = method(url, json=data, headers=headers)
+            else:
+                response = method(url, headers=headers)
             response.raise_for_status()
 
             if response.text:
