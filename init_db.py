@@ -4,7 +4,6 @@ Para entornos CI/producción usar migraciones: ``alembic upgrade head``.
 """
 
 from database.database import Base, engine
-
 from entities.api_usuario import ApiUsuario  # noqa: F401
 from entities.boleto import Boleto  # noqa: F401
 from entities.juego import Juego  # noqa: F401
