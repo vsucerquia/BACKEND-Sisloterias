@@ -5,7 +5,8 @@ Sistema de lotería con **API REST (FastAPI)**, **PostgreSQL en Neon** y **menú
 ## Requisitos
 
 - Python 3.10+
-- Cuenta en [Neon](https://neon.tech) (cadena de conexión PostgreSQL)
+- Cuenta en DATABASE_URL=postgresql://neondb_owner:npg_dc3T0WlzJmQN@ep-red-sea-a46oayjl-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+ (cadena de conexión PostgreSQL)
 
 ## Configuración
 
@@ -90,13 +91,11 @@ El workflow **`.github/workflows/ci.yml`** se ejecuta en **push** y **pull_reque
 
 ## Video de demostración (examen 2)
 
-Cuando tengan el video listo (pipeline en Actions + migraciones/seeder o esquema en BD), **Valeria y Valentina** pueden enlazarlo aquí, por ejemplo:
+Demostración del pipeline en GitHub Actions (rama `dev`) y de migraciones/seeder / esquema en base de datos, según el enunciado del examen 2.
 
-```markdown
-[![Demostración](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
-```
+**Ver en YouTube:** [https://youtu.be/Vz9pwSoXz44](https://youtu.be/Vz9pwSoXz44)
 
-*(Sustituir `VIDEO_ID` por el de YouTube o usar enlace a Drive.)*
+[![Miniatura – demostración](https://img.youtube.com/vi/Vz9pwSoXz44/0.jpg)](https://youtu.be/Vz9pwSoXz44)
 
 ## Ejecutar la API (Uvicorn)
 
@@ -156,4 +155,4 @@ Cada uno expone: `GET /`, `GET /{id}`, `POST /`, `PUT /{id}`, `DELETE /{id}`.
 
 Proyecto para el curso **Aplicación y Servicios Web**.
 
-Autoras: Valeria y Valentina Sucerquia Álvarez.
+Autoras: Valeria y Valentina Sucerquia Alvarez.
