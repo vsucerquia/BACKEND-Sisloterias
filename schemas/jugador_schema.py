@@ -1,11 +1,13 @@
-from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel, EmailStr
 
 
 class JugadorBase(BaseModel):
     nombre: str
     email: EmailStr
+    telefono: Optional[str] = None
 
 
 class JugadorCreate(JugadorBase):
@@ -15,6 +17,7 @@ class JugadorCreate(JugadorBase):
 class JugadorUpdate(BaseModel):
     nombre: Optional[str] = None
     email: Optional[EmailStr] = None
+    telefono: Optional[str] = None
 
 
 class JugadorResponse(JugadorBase):

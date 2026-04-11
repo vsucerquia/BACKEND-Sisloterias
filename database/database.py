@@ -1,10 +1,10 @@
-"""Configuración de SQLAlchemy: motor, sesión y base declarativa.
+"""Database helpers (SQLAlchemy) for the Sisloterias project.
 
-La URL de conexión se lee de la variable de entorno ``DATABASE_URL`` (archivo ``.env``).
-Para Neon (PostgreSQL), usa la cadena que copias del panel de Neon; suele incluir
+La URL se lee de la variable de entorno ``DATABASE_URL`` (archivo ``.env`` en la raíz
+del backend). Para Neon (PostgreSQL), usa la cadena del panel; suele incluir
 ``?sslmode=require``.
 
-No pegues la connection string en este archivo Python; solo en ``.env`` (``DATABASE_URL=``).
+No pegues la connection string en código; solo en ``.env``.
 """
 
 import os
@@ -14,13 +14,12 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Carga .env desde la raíz del proyecto BACKEND-Sisloterias
 _root = Path(__file__).resolve().parent.parent
 _env_path = _root / ".env"
 load_dotenv(_env_path)
 
-SQLALCHEMY_DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip()
-if not SQLALCHEMY_DATABASE_URL:
+DATABASE_URL = (os.getenv("DATABASE_URL") or "").strip()
+if not DATABASE_URL:
     if _env_path.is_file():
         detalle = (
             f"\nEl archivo existe: {_env_path}\n"
@@ -39,8 +38,13 @@ if not SQLALCHEMY_DATABASE_URL:
         + "\nNo subas .env al repositorio."
     )
 
+connect_args: dict = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    DATABASE_URL,
+    connect_args=connect_args,
     pool_pre_ping=True,
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -48,11 +52,7 @@ Base = declarative_base()
 
 
 def get_db():
-    """Entrega una sesión de base de datos para inyección en FastAPI.
-
-    Yields:
-        sqlalchemy.orm.Session: Sesión de base de datos.
-    """
+    """Dependency that provides a database session."""
 
     db = SessionLocal()
     try:
