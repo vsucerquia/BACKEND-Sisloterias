@@ -1,12 +1,20 @@
+"""Cliente HTTP genérico para operaciones CRUD contra la API REST."""
+
+from __future__ import annotations
+
 import requests
 
 
 class CrudClient:
-    def __init__(self, base_url: str = "http://127.0.0.1:8000"):
+    """Envía GET/POST/PUT/DELETE a ``base_url`` para un recurso dado (path relativo)."""
+
+    def __init__(self, base_url: str = "http://127.0.0.1:8000") -> None:
         self.base_url = base_url.rstrip("/")
 
     def _request(self, method, endpoint: str, data: dict | None = None):
+        """Ejecuta una petición y devuelve JSON o un dict con error estructurado."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        response = None
         try:
             response = method(url, json=data) if data else method(url)
             response.raise_for_status()
@@ -16,6 +24,8 @@ class CrudClient:
             return {"message": "Operación realizada correctamente"}
 
         except requests.exceptions.HTTPError:
+            if response is None:
+                return {"success": False, "error": "Error HTTP sin respuesta"}
             try:
                 return {
                     "success": False,
@@ -51,16 +61,21 @@ class CrudClient:
             }
 
     def list_all(self, resource: str):
+        """GET ``resource/`` — lista todos los registros."""
         return self._request(requests.get, f"{resource}/")
 
     def get_by_id(self, resource: str, item_id: int):
+        """GET ``resource/{id}``."""
         return self._request(requests.get, f"{resource}/{item_id}")
 
     def create(self, resource: str, data: dict):
+        """POST ``resource/`` con cuerpo JSON."""
         return self._request(requests.post, f"{resource}/", data)
 
     def update(self, resource: str, item_id: int, data: dict):
+        """PUT ``resource/{id}`` con cuerpo JSON."""
         return self._request(requests.put, f"{resource}/{item_id}", data)
 
     def delete(self, resource: str, item_id: int):
+        """DELETE ``resource/{id}``."""
         return self._request(requests.delete, f"{resource}/{item_id}")
