@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.orm import relationship
+
 from database.database import Base
 
 
@@ -11,5 +13,6 @@ class Jugador(Base):
     nombre = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     fecha_registro = Column(DateTime, default=datetime.utcnow)
+    telefono = Column(String(30), nullable=True)
 
     boletos = relationship("Boleto", back_populates="jugador")

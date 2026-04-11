@@ -27,3 +27,10 @@ class BadRequestException(AppException):
 
     def __init__(self, message: str = "Solicitud incorrecta"):
         super().__init__(message, 400)
+
+
+class UnauthorizedException(AppException):
+    """No autenticado o credenciales inválidas."""
+
+    def __init__(self, message: str = "No autorizado"):
+        super().__init__(message, 401)

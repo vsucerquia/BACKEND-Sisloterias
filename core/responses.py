@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Any, Optional
+
+from pydantic import BaseModel
 
 
 class ApiResponse(BaseModel):
@@ -17,7 +18,7 @@ def success_response(message: str, data: Any = None):
     return {
         "success": True,
         "message": message,
-        "data": data
+        "data": data,
     }
 
 
@@ -25,5 +26,5 @@ def error_response(message: str, detail: Any = None):
     return {
         "success": False,
         "message": message,
-        "detail": detail
+        "detail": detail,
     }

@@ -1,255 +1,159 @@
 # BACKEND-Sisloterias
-Sistema de Lotería desarrollado para simular el funcionamiento básico de un sorteo, permitiendo la generación de números aleatorios, registro de jugadores y validación de ganadores.
 
-# Sistema de Lotería / Apuestas – API REST con FastAPI
+Sistema de lotería con **API REST (FastAPI)**, **PostgreSQL en Neon** y **menú por consola** que consume la API solo por HTTP.
 
-## Descripción
+## Requisitos
 
-Este proyecto implementa una **API REST utilizando FastAPI** para gestionar un sistema de **lotería y apuestas**.
+- Python 3.10+
+- Cuenta en [Neon](https://neon.tech) (cadena de conexión PostgreSQL)
 
-La aplicación permite realizar operaciones **CRUD (Crear, Leer, Actualizar, Eliminar)** sobre las diferentes entidades del sistema mediante endpoints HTTP.
+## Configuración
 
-El proyecto utiliza:
+1. Clona el repositorio y entra en la carpeta del backend.
 
-* **FastAPI** para la API
-* **PostgreSQL (Neon)** como base de datos
-* **SQLAlchemy** como ORM
-* **Pydantic** para validación de datos
-* **Uvicorn** como servidor ASGI
-* **Requests / HTTPX** para el cliente HTTP del menú por consola
+2. Entorno virtual (recomendado):
 
-Además incluye un **menú por consola que consume la API mediante peticiones HTTP**.
+   ```text
+   python -m venv venv
+   venv\Scripts\activate
+   ```
 
----
+3. Instala dependencias:
 
-# Tecnologías utilizadas
+   ```text
+   pip install -r requirements.txt
+   ```
 
-* Python 3.10+
-* FastAPI
-* Uvicorn
-* PostgreSQL (Neon)
-* SQLAlchemy
-* Pydantic
-* Requests / HTTPX
-* python-dotenv
-* bcrypt
+4. Crea el archivo **`.env`** en la raíz de este proyecto (junto a `app.py`). Puedes partir de **`.env.example`**:
 
----
+   ```text
+   copy .env.example .env
+   ```
 
-# Arquitectura del proyecto
+5. En Neon, copia la **connection string** de PostgreSQL y pégala en `.env`:
 
-El proyecto sigue una **arquitectura modular** separando responsabilidades por capas.
+   ```env
+   DATABASE_URL=postgresql://usuario:contraseña@ep-xxxxx.region.aws.neon.tech/neondb?sslmode=require
+   ```
 
+   También define **`SECRET_KEY`** (JWT, mínimo ~32 caracteres en producción), **`CORS_ORIGINS`**, y opcionalmente **`SEED_ADMIN_USER`** / **`SEED_ADMIN_PASSWORD`** (usuario del seeder para `/auth/login`).
+
+   Para clientes HTTP (menú o scripts) que llamen rutas protegidas, tras hacer login puedes guardar el token:
+
+   ```env
+   API_BASE_URL=http://127.0.0.1:8000
+   API_BEARER_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+   ```
+
+   No subas **`.env`** a Git (ya está en `.gitignore`).
+
+## Base de datos: migraciones y seeder (recomendado)
+
+Con `.env` apuntando a tu PostgreSQL:
+
+```text
+py -m alembic upgrade head
+py -m scripts.seed
 ```
-src/
-│
-├── app.py                       # Aplicación FastAPI y registro de routers
-│
-├── core/                        # Núcleo del sistema
-│   ├── exceptions.py
-│   ├── responses.py
-│   └── error_handlers.py
-│
+
+Las migraciones son **idempotentes** respecto a tablas ya creadas con `init_db.py`: no vuelven a crear `juegos` ni duplican columnas; solo registran el estado en `alembic_version` y aplican lo que falte (`telefono`, `api_usuarios`).
+
+Alternativa rápida solo con ORM (desarrollo):
+
+```text
+py init_db.py
+```
+
+## Autenticación JWT
+
+1. Arranca la API y abre **Swagger** (`/docs`).
+2. **POST `/auth/login`**: cuerpo tipo form (`username` / `password`) con el usuario creado por el seeder (por defecto `admin` y la clave de `SEED_ADMIN_PASSWORD` en `.env`).
+3. Copia `access_token` y usa **Authorize** → `Bearer <token>` para probar rutas bajo `/jugadores`, `/juegos`, etc.
+
+Las rutas **`/`** y **`/auth/login`** son públicas; el resto de recursos exige cabecera `Authorization: Bearer ...`.
+
+## CORS
+
+Orígenes permitidos vienen de **`CORS_ORIGINS`** (lista separada por comas). En producción conviene listar solo los dominios del frontend; no uses `*` con `allow_credentials=True`.
+
+## Pruebas locales (pytest)
+
+Tras `alembic upgrade head` y `python -m scripts.seed`:
+
+```text
+pytest -q
+```
+
+## CI (GitHub Actions)
+
+El workflow **`.github/workflows/ci.yml`** se ejecuta en **push** y **pull_request** hacia la rama **`dev`**: Ruff, Alembic, seeder y pytest contra PostgreSQL de servicio.
+
+## Video de demostración (examen 2)
+
+Cuando tengan el video listo (pipeline en Actions + migraciones/seeder o esquema en BD), **Valeria y Valentina** pueden enlazarlo aquí, por ejemplo:
+
+```markdown
+[![Demostración](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
+```
+
+*(Sustituir `VIDEO_ID` por el de YouTube o usar enlace a Drive.)*
+
+## Ejecutar la API (Uvicorn)
+
+Desde la raíz del backend:
+
+```text
+python main.py
+```
+
+O:
+
+```text
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+- API: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- Swagger: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+## Cliente HTTP (`crud_client`)
+
+`crud/crud_client.py` envía **`Authorization: Bearer`** si existe **`API_BEARER_TOKEN`** en el entorno (útil tras login).
+
+## Estructura del proyecto
+
+```text
+BACKEND-Sisloterias/
+├── app.py
+├── main.py
+├── alembic/               # Migraciones
+├── scripts/seed.py        # Seeder idempotente
+├── init_db.py             # create_all (ORM)
 ├── database/
-│   └── database.py              # Conexión a PostgreSQL
-│
-├── entities/                    # Modelos ORM (SQLAlchemy)
-│   ├── jugador.py
-│   ├── juego.py
-│   ├── sorteo.py
-│   ├── boleto.py
-│   ├── premio.py
-│   └── pago.py
-│
-├── schemas/                     # Modelos Pydantic
-│   ├── jugador_schema.py
-│   ├── juego_schema.py
-│   ├── sorteo_schema.py
-│   ├── boleto_schema.py
-│   ├── premio_schema.py
-│   └── pago_schema.py
-│
-├── endpoints/                   # Rutas FastAPI
-│   ├── jugadores_router.py
-│   ├── juegos_router.py
-│   ├── sorteos_router.py
-│   ├── boletos_router.py
-│   ├── premios_router.py
-│   └── pagos_router.py
-│
-├── crud/                        # Cliente HTTP para consumir la API
-│   └── crud_client.py
-│
-├── utils/
-│   └── security.py
-│
-├── main.py                      # Menú por consola
-├── init_db.py                   # Script para crear tablas
-│
-├── requirements.txt
-└── README.md
+├── entities/
+├── schemas/
+├── endpoints/
+├── dependencies/          # JWT (get_current_user)
+├── crud/
+├── core/
+├── tests/
+└── utils/
 ```
 
----
+## Entidades (6)
 
-# Entidades del sistema
+| Recurso   | Prefijo API   |
+|----------|---------------|
+| Jugador  | `/jugadores`  |
+| Juego    | `/juegos`     |
+| Sorteo   | `/sorteos`    |
+| Boleto   | `/boletos`    |
+| Premio   | `/premios`    |
+| Pago     | `/pagos`      |
 
-El sistema incluye **6 entidades principales**:
+Cada uno expone: `GET /`, `GET /{id}`, `POST /`, `PUT /{id}`, `DELETE /{id}`.
 
-### Jugador
+## Autor
 
-Representa al usuario que participa en el sistema.
+Proyecto para el curso **Aplicación y Servicios Web**.
 
-### Juego
-
-Tipo de juego disponible (lotería, ruleta, bingo).
-
-### Sorteo
-
-Evento donde se determina el número ganador.
-
-### Boleto
-
-Apuesta realizada por un jugador.
-
-### Premio
-
-Premio asignado a un boleto ganador.
-
-### Pago
-
-Registro del pago de un premio.
-
----
-
-# Relaciones entre entidades
-
-* Un **jugador** puede tener muchos **boletos**
-* Un **juego** puede tener muchos **sorteos**
-* Un **sorteo** puede tener muchos **boletos**
-* Un **boleto** puede generar un **premio**
-* Un **premio** puede registrar un **pago**
-
----
-
-# Instalación
-
-## 1. Clonar el repositorio
-
-```
-git clone https://github.com/tu-usuario/api-loteria-fastapi.git
-cd api-loteria-fastapi
-```
-
----
-
-## 2. Crear entorno virtual
-
-```
-python -m venv venv
-```
-
-Activar entorno virtual:
-
-Windows
-
-```
-venv\Scripts\activate
-```
-
-Linux / Mac
-
-```
-source venv/bin/activate
-```
-
----
-
-## 3. Instalar dependencias
-
-```
-pip install -r requirements.txt
-```
-
----
-
-# Configuración de base de datos
-
-Crear un archivo `.env` en la raíz del proyecto.
-
-```
-DATABASE_URL=postgresql://usuario:password@host/database
-```
-
-La base de datos utilizada es **PostgreSQL en Neon**.
-
----
-
-# Crear tablas en la base de datos
-
-Ejecutar el script:
-
-```
-python src/init_db.py
-```
-
-Esto creará todas las tablas definidas en los modelos ORM.
-
----
-
-# Ejecutar la API
-
-```
-uvicorn src.app:app --reload
-```
-
-La API estará disponible en:
-
-```
-http://127.0.0.1:8000
-```
-
----
-
-# Documentación automática
-
-FastAPI genera documentación automática con Swagger.
-
-```
-http://127.0.0.1:8000/docs
-```
-
----
-
-# Endpoints principales
-
-## Jugadores
-
-```
-GET /jugadores
-GET /jugadores/{id}
-POST /jugadores
-PUT /jugadores/{id}
-DELETE /jugadores/{id}
-```
-
-## Juegos
-
-```
-GET /juegos
-POST /juegos
-PUT /juegos/{id}
-DELETE /juegos/{id}
-```
-
-## Sorteos
-
-```
-GET /sorteos
-POST /sorteos
-PUT /sorteos/{id}
-DELETE /sorteos/{id}
-```
-
-## Boletos
-
+Autoras: Valeria y Valentina Sucerquia Álvarez.
