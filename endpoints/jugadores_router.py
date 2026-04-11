@@ -1,15 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from database.database import get_db
 
+from core.exceptions import NotFoundException
+from database.database import get_db
+from dependencies.auth import get_current_user
 from entities.jugador import Jugador
 from schemas.jugador_schema import (
     JugadorCreate,
+    JugadorResponse,
     JugadorUpdate,
-    JugadorResponse
 )
 
-router = APIRouter(prefix="/jugadores", tags=["Jugadores"])
+router = APIRouter(
+    prefix="/jugadores",
+    tags=["Jugadores"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/", response_model=list[JugadorResponse])
@@ -22,12 +28,12 @@ def obtener_jugador(jugador_id: int, db: Session = Depends(get_db)):
     jugador = db.query(Jugador).filter(Jugador.id_jugador == jugador_id).first()
 
     if not jugador:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+        raise NotFoundException("Jugador no encontrado")
 
     return jugador
 
 
-@router.post("/", response_model=JugadorResponse)
+@router.post("/", response_model=JugadorResponse, status_code=201)
 def crear_jugador(data: JugadorCreate, db: Session = Depends(get_db)):
     nuevo = Jugador(**data.model_dump())
 
@@ -44,7 +50,7 @@ def actualizar_jugador(jugador_id: int, data: JugadorUpdate, db: Session = Depen
     jugador = db.query(Jugador).filter(Jugador.id_jugador == jugador_id).first()
 
     if not jugador:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+        raise NotFoundException("Jugador no encontrado")
 
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(jugador, key, value)
@@ -61,7 +67,7 @@ def eliminar_jugador(jugador_id: int, db: Session = Depends(get_db)):
     jugador = db.query(Jugador).filter(Jugador.id_jugador == jugador_id).first()
 
     if not jugador:
-        raise HTTPException(status_code=404, detail="Jugador no encontrado")
+        raise NotFoundException("Jugador no encontrado")
 
     db.delete(jugador)
     db.commit()
