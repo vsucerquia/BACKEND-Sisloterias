@@ -1,23 +1,30 @@
 """Database helpers (SQLAlchemy) for the Sisloterias project."""
 
+import os
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sisloterias.db"
+load_dotenv()
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError(
+        "DATABASE_URL no está definida. Crea un archivo .env (ver .env.example)."
+    )
+
+connect_args: dict = {}
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
 def get_db():
-    """Dependency that provides a database session.
-
-    Yields:
-        sqlalchemy.orm.Session: a database session.
-    """
+    """Dependency that provides a database session."""
 
     db = SessionLocal()
     try:
