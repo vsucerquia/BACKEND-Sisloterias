@@ -5,8 +5,7 @@ Sistema de lotería con **API REST (FastAPI)**, **PostgreSQL en Neon** y **menú
 ## Requisitos
 
 - Python 3.10+
-- Cuenta en DATABASE_URL=postgresql://neondb_owner:npg_dc3T0WlzJmQN@ep-red-sea-a46oayjl-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
- (cadena de conexión PostgreSQL)
+- Cuenta en Neon/PostgreSQL para obtener la cadena de conexión `DATABASE_URL`.
 
 ## Configuración
 
@@ -97,6 +96,14 @@ Demostración del pipeline en GitHub Actions (rama `dev`) y de migraciones/seede
 
 [![Miniatura – demostración](https://img.youtube.com/vi/Vz9pwSoXz44/0.jpg)](https://youtu.be/Vz9pwSoXz44)
 
+## Video de demostración (examen final)
+
+Demostración de pruebas Pytest, backend desplegado en Render, frontend desplegado en Firebase Hosting y CRUD funcional consumiendo la API desplegada.
+
+**Ver en YouTube:** [https://youtu.be/FGOq7YxQ200](https://youtu.be/FGOq7YxQ200)
+
+[![Miniatura – examen final](https://img.youtube.com/vi/FGOq7YxQ200/0.jpg)](https://youtu.be/FGOq7YxQ200)
+
 ## Ejecutar la API (Uvicorn)
 
 Desde la raíz del backend:
@@ -150,6 +157,14 @@ BACKEND-Sisloterias/
 | Pago     | `/pagos`      |
 
 Cada uno expone: `GET /`, `GET /{id}`, `POST /`, `PUT /{id}`, `DELETE /{id}`.
+
+## Despliegue en Render (examen final)
+
+Guía: [docs/DEPLOY-RENDER.md](docs/DEPLOY-RENDER.md)
+
+Incluye el archivo `render.yaml` (Blueprint). Variables obligatorias en el panel: `DATABASE_URL` (Neon), `SECRET_KEY`, `CORS_ORIGINS` (URLs de Firebase Hosting + `http://localhost:4200`).
+
+El frontend se despliega en **Firebase Hosting** (repo `Frontend-Sisloteria/web`).
 
 ## Autor
 
