@@ -24,7 +24,7 @@ from endpoints import (
 
 _origins_raw = os.getenv(
     "CORS_ORIGINS",
-    "http://127.0.0.1:5500,http://localhost:3000,http://127.0.0.1:8000",
+    "http://127.0.0.1:5500,http://localhost:3000,http://localhost:4200,http://127.0.0.1:4200,http://127.0.0.1:8000",
 )
 CORS_ORIGINS = [o.strip() for o in _origins_raw.split(",") if o.strip()]
 

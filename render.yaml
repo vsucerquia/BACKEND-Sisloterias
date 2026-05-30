@@ -1,0 +1,24 @@
+# Blueprint Render: https://render.com/docs/blueprint-spec
+# Tras conectar el repo, completa en el panel las variables sensibles (DATABASE_URL, SECRET_KEY, CORS_ORIGINS).
+
+services:
+  - type: web
+    name: sisloteria-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && alembic upgrade head && python -m scripts.seed
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SEED_ADMIN_USER
+        value: admin
+      - key: SEED_ADMIN_PASSWORD
+        generateValue: true
